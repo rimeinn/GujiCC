@@ -1,0 +1,33 @@
+on: [push]
+
+jobs:
+  publish_latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt install -y opencc
+
+      - name: Build OCD2
+        run: |
+          mkdir out
+          cp -a opencc/*.txt opencc/*.json out
+          cd out
+          opencc_dict -f text -t ocd2 -i GSCharacters.txt -o GSCharacters.ocd2
+          opencc_dict -f text -t ocd2 -i GSPhrases.txt -o GSPhrases.ocd2
+          opencc_dict -f text -t ocd2 -i SCCharacters.txt -o SCPhrases.ocd2
+          opencc_dict -f text -t ocd2 -i SGCharacters.txt -o SGCharacters.ocd2
+          opencc_dict -f text -t ocd2 -i SGPhrases.txt -o SGPhrases.ocd2
+          opencc_dict -f text -t ocd2 -i TSCharacters.txt -o TSCharacters.ocd2
+
+      - name: Publish
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: latest
+          prerelease: true
+          title: "Latest"
+          files: |
+            out/*
